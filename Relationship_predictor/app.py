@@ -4,34 +4,37 @@ import numpy as np
 import joblib
 import os
 
-# Page config
+# 1) Page config
 st.set_page_config(page_title="Relationship Probability", layout="centered")
 
-# Get absolute path of this file's directory
+# 2) Find the folder where THIS app.py is running
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# ---------------- SAFE MODEL LOADER ---------------- #
+# Debug info - you can remove later
+st.write("📂 Running from folder:", BASE_DIR)
+st.write("📄 Files in this folder:", os.listdir(BASE_DIR))
 
+# 3) Safe model loader that uses absolute path
 def safe_load_model(filename, name):
-    path = os.path.join(BASE_DIR, filename)
+    full_path = os.path.join(BASE_DIR, filename)
     try:
-        model = joblib.load(path)
+        model = joblib.load(full_path)
         return model
     except FileNotFoundError:
         st.error(
-            f"File for {name} not found.\n\n"
-            f"Looked for: {path}\n\n"
-            f"Make sure `{filename}` is in the SAME folder as `app.py` in your repo."
+            f"❌ File for {name} not found.\n\n"
+            f"Tried to load: {full_path}\n\n"
+            f"Make sure `{filename}` is in the SAME folder as `app.py` in your GitHub repo."
         )
         st.stop()
     except ModuleNotFoundError as e:
-        st.error(f"Missing Python package while loading {name}: {e}")
+        st.error(f"❌ Missing Python package while loading {name}: {e}")
         st.stop()
     except Exception as e:
-        st.error(f"Error loading {name} from {path}: {e}")
+        st.error(f"❌ Error loading {name} from {full_path}: {e}")
         st.stop()
 
-# Load models from the same folder as app.py
+# 4) Load models from same folder as app.py
 xgb = safe_load_model("xgb_model.pkl", "XGBoost model")
 cat = safe_load_model("cat_model.pkl", "CatBoost model")
 
@@ -236,126 +239,4 @@ if predict_btn:
         unsafe_allow_html=True,
     )
 
-    # message based on prob
-    if prob >= 80:
-        st.markdown(
-            f"""
-            <p style='text-align:center; font-size:1.1rem; color:#e0f2fe; margin-top:0.5rem;'>
-                {name_display}, yeh toh elite tier scene hai.<br>
-                <b>“Cupid ne bhi bola, OP life!”</b> 💘
-            </p>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            """
-            <p style='text-align:center; font-size:0.95rem; color:#cbd5f5;'>
-                Catch line: <i>“Tumhara graph bhi smooth hai, aur vibe bhi.”</i>
-            </p>
-            """,
-            unsafe_allow_html=True,
-        )
-    elif prob >= 60:
-        st.markdown(
-            f"""
-            <p style='text-align:center; font-size:1.05rem; color:#bbf7d0; margin-top:0.5rem;'>
-                {name_display}, strong chances hain, bas thoda sa right time, right person. 😉
-            </p>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            """
-            <p style='text-align:center; font-size:0.95rem; color:#d1fae5;'>
-                Catch line: <i>“Scene bana hua hai, bas confirm hone ka wait hai.”</i>
-            </p>
-            """,
-            unsafe_allow_html=True,
-        )
-    elif prob >= 40:
-        st.markdown(
-            f"""
-            <p style='text-align:center; font-size:1.05rem; color:#fef9c3; margin-top:0.5rem;'>
-                {name_display}, 50–50 ka scene hai, thoda effort doge toh story ban sakti hai. 🙂
-            </p>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            """
-            <p style='text-align:center; font-size:0.95rem; color:#fef3c7;'>
-                Catch line: <i>“Chances hain, bas tum confident rehna.”</i>
-            </p>
-            """,
-            unsafe_allow_html=True,
-        )
-    elif prob >= 20:
-        st.markdown(
-            f"""
-            <p style='text-align:center; font-size:1.05rem; color:#fed7aa; margin-top:0.5rem;'>
-                {name_display}, scene weak hai, par hopeless nahi. Work on yourself, baaki life dekh legi. 🙂
-            </p>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            """
-            <p style='text-align:center; font-size:0.95rem; color:#fed7aa;'>
-                Catch line: <i>“Abhi story filler episode pe hai, climax baad mein aayega.”</i>
-            </p>
-            """,
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            f"""
-            <p style='text-align:center; font-size:1.05rem; color:#fecaca; margin-top:0.5rem;'>
-                {name_display}, iss time relationship graph se zyada tumhari self-growth ka chart important hai. 🌧️
-            </p>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            """
-            <p style='text-align:center; font-size:0.95rem; color:#fecaca;'>
-                Catch line: <i>“Dil tumhara sahi hai, bas timing thodi galat chal rahi hai.”</i>
-            </p>
-            """,
-            unsafe_allow_html=True,
-        )
-
-# legend
-st.markdown(
-    """
-    <div style="margin-top:2.5rem;">
-        <div style="font-size:0.9rem; color:#9ca3af; text-align:center; margin-bottom:0.3rem;">
-            Color legend
-        </div>
-        <div style="display:flex; height:18px; border-radius:999px; overflow:hidden; border:1px solid #374151;">
-            <div style="flex:1; background:#7f1d1d;"></div>
-            <div style="flex:1; background:#9a3412;"></div>
-            <div style="flex:1; background:#ca8a04;"></div>
-            <div style="flex:1; background:#15803d;"></div>
-            <div style="flex:1; background:#0e7490;"></div>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#9ca3af; margin-top:4px;">
-            <span>0–20%: Dead scene</span>
-            <span>20–40%: Weak</span>
-            <span>40–60%: Maybe</span>
-            <span>60–80%: Strong</span>
-            <span>80–100%: Elite</span>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-st.markdown(
-    """
-    <hr style="margin-top:1.5rem; margin-bottom:0.5rem; border-color:#1f2937;">
-    <p style='text-align:center; font-size:0.8rem; color:#6b7280;'>
-        This is a fun ML demo, not real relationship advice. But haan, gym, GPA aur personality pe kaam karna kabhi waste nahi jaata 😌
-    </p>
-    """,
-    unsafe_allow_html=True,
-)
+# legend and footer as earlier can stay same if you want
